@@ -1,14 +1,15 @@
-ARG CENTOS_VER=docker.io/centos:8.2.2004
-FROM ${CENTOS_VER}
-
-WORKDIR /root
+ARG BUILD_IMAGE_BASE
+FROM ${BUILD_IMAGE_BASE}
 
 ARG KMODVER
 ARG KVER
-ARG RPM_URL="https://vault.centos.org/8.2.2004/BaseOS/x86_64/os/Packages/kernel-devel-4.18.0-193.el8.x86_64.rpm"
 
-RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
-RUN dnf install -y ${RPM_URL}
+RUN mkdir -p /etc/pki/entitlement
+COPY pki.key /etc/pki/entitlement/entitlement.pem
+COPY pki.key /etc/pki/entitlement/entitlement-key.pem
+
+WORKDIR /root
+
 RUN yum install -y git-core gcc elfutils-libelf-devel make kmod
 
 RUN git clone --branch n5010/fpga-ofs-dev-5.10-lts https://github.com/OPAE/linux-dfl-backport.git && \

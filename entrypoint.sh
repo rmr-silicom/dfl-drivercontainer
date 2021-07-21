@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# SPDX-License-Identifier: Apache-2.0
-# Copyright (c) 2020 Intel Corporation
-
 modules=(regmap-indirect-register
             regmap-spi-avmm \
             dfl-pci \

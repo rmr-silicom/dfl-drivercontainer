@@ -2,30 +2,32 @@
 
 KMODVER := eea9cbc
 IMAGE_REGISTRY ?= quay.io/ryan_raasch
-PODMAN ?= docker
-CLI_EXEC ?= bin/oc
+BUILDTOOL ?= docker
 
-KVER_RHEL82 = 4.18.0-193.el8.x86_64
-KVER_RHEL83 = 4.18.0-240.el8.x86_64
-BUILD_ARGS_RHEL82 = --build-arg CENTOS_VER=docker.io/centos:8.2.2004
-BUILD_ARGS_RHEL83 = --build-arg CENTOS_VER=docker.io/centos:8.3.2011
-RHEL_VER ?= rhel82
+DRIVER_TOOLKIT  = registry.redhat.io/openshift4/driver-toolkit-rhel8
 
-BUILD_ARGS := $(BUILD_ARGS_RHEL82)
-ifeq ($(RHEL_VER),rhel83)
-BUILD_ARGS := $(BUILD_ARGS_RHEL83)
-endif
+PKI_PATH ?= $(shell echo $$HOME)/pems/export/entitlement_certificates/pki.key
 
-BUILDTOOL?= podman
-IMAGE_NAME := opae
+OCP_KVER_4_6    = 4.18.0-193.56.1.el8_2.x86_64
+OCP_KVER_4_7    = 4.18.0-240.22.1.el8_3.x86_64
 
-IMAGE := $(IMAGE_REGISTRY)/$(IMAGE_NAME):$(VERSION)
+BUILD_ARGS_OCP_4_6 = --build-arg KVER=$(OCP_KVER_4_6) --build-arg BUILD_IMAGE_BASE=$(DRIVER_TOOLKIT):v4.6.0
+BUILD_ARGS_OCP_4_7 = --build-arg KVER=$(OCP_KVER_4_7) --build-arg BUILD_IMAGE_BASE=$(DRIVER_TOOLKIT):v4.7.0
 
-all: image
+BUILDTOOL?= docker
 
-image:
-	$(BUILDTOOL) build . $(CONTAINER_BUILD_ARGS) -t $(IMAGE)
+all: ocp-4.6 ocp-4.7
 
-push: image
-	$(BUILDTOOL) push $(IMAGE) $(CONTAINER_PUSH_ARGS)
+pem:
+	cp -v $(PKI_PATH) pki.key
+
+ocp-4.6: pem
+	$(BUILDTOOL) build . $(BUILD_ARGS_OCP_4_6) -t $(IMAGE_REGISTRY)/dfl-drivercontainer:ocp-4.6-$(KMODVER)
+
+ocp-4.7: pem
+	$(BUILDTOOL) build . $(BUILD_ARGS_OCP_4_7) -t $(IMAGE_REGISTRY)/dfl-drivercontainer:ocp-4.7-$(KMODVER)
+
+push:
+	$(BUILDTOOL) push $(IMAGE_REGISTRY)/dfl-drivercontainer:ocp-4.6-$(KMODVER)
+	$(BUILDTOOL) push $(IMAGE_REGISTRY)/dfl-drivercontainer:ocp-4.7-$(KMODVER)
 
