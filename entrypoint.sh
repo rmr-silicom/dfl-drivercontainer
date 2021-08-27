@@ -6,7 +6,6 @@ modules=(regmap-indirect-register
             dfl-afu \
             dfl-fme \
             dfl \
-            dfl-spi-altera \
             dfl-fme-br \
             dfl-fme-mgr \
             dfl-fme-region \
@@ -20,7 +19,8 @@ modules=(regmap-indirect-register
             n5010-phy \
             n5010-hssi \
             s10hssi \
-            spi-altera)
+            spi-altera-core \
+            spi-altera-dfl)
 
 modules_reverse_order=$(printf '%s\n' "${modules[@]}" | tac | tr '\n' ' ')
 
