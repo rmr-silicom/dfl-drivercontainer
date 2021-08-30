@@ -6,4 +6,3 @@ for module in $modules ; do
     modprobe $module
 done
 
-sleep infinity
